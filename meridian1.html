@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Meridian — Exact sleep, wake, light and flight prep times for short trips abroad." />
+  <title>Meridian · Sleep Timezone Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple-primary: #5b42c0;
+      --purple-soft: #7c6cd4;
+      --text-dark: #1a1628;
+      --text-mid: #4a4260;
+      --text-muted: #9490b0;
+      --text-light: #b8b4d0;
+      --card-bg: rgba(255,255,255,0.82);
+      --border: rgba(180,170,220,0.3);
+      --border-strong: rgba(180,170,220,0.5);
+      --green-bg: #d4f5e8; --green-text: #0d6644;
+      --blue-bg: #dbeeff;  --blue-text: #0c4a8c;
+      --yellow-bg: #fef3d0; --yellow-text: #7a5200;
+      --purple-bg: #eeebfc; --purple-text: #3d2a99;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(160deg, #ede9f8 0%, #f4f2fb 35%, #eeeaf8 65%, #e8e3f5 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      border-bottom: 0.5px solid var(--border);
+      backdrop-filter: blur(12px);
+      background: rgba(240,238,248,0.7);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      color: var(--text-dark);
+    }
+    .nav-tag {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding-left: 10px;
+      border-left: 0.5px solid var(--border-strong);
+    }
+    .nav-right {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 64px 48px 40px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 0.5px;
+      background: var(--text-muted);
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 68px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero h1 .accent { color: var(--purple-soft); font-style: italic; }
+    .hero-sub {
+      font-size: 15px;
+      color: var(--text-mid);
+      max-width: 480px;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 48px 48px;
+      align-items: start;
+    }
+
+    /* ── INPUT CARD ── */
+    .input-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 0.5px solid var(--border-strong);
+      padding: 28px;
+      box-shadow: 0 4px 24px rgba(91,66,192,0.06);
+    }
+    .card-section-head {
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .field select,
+    .field input[type="time"] {
+      padding: 10px 12px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      background: rgba(255,255,255,0.7);
+      color: var(--text-dark);
+      outline: none;
+      width: 100%;
+      min-height: 44px; /* touch-friendly */
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239490b0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .field select:focus,
+    .field input[type="time"]:focus {
+      border-color: var(--purple-soft);
+      box-shadow: 0 0 0 3px rgba(124,108,212,0.12);
+    }
+    .card-divider { height: 0.5px; background: var(--border); margin: 20px 0; }
+    .tz-bar {
+      margin-top: 16px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 0.5px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .tz-bar .tz-code  { font-weight: 500; color: var(--text-mid); }
+    .tz-bar .tz-shift { color: var(--purple-primary); font-weight: 500; }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── STATS ── */
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .stat-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 0.5px solid var(--border-strong);
+      padding: 20px 22px;
+      box-shadow: 0 2px 12px rgba(91,66,192,0.05);
+    }
+    .stat-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 400;
+      color: var(--text-dark);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .stat-value .unit { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); letter-spacing: 0.06em; }
+
+    /* ── TABS ── */
+    .tabs-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border-strong);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      color: var(--text-mid);
+      background: rgba(255,255,255,0.5);
+      transition: all 0.15s;
+      min-height: 44px; /* touch target */
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn.active { background: var(--purple-primary); color: white; border-color: var(--purple-primary); font-weight: 500; }
+
+    /* ── LEGEND ── */
+    .legend-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── TZ BANNER ── */
+    .tz-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-mid);
+      background: rgba(255,255,255,0.6);
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 0.5px solid var(--border-strong);
+      line-height: 1.5;
+    }
+    .tz-banner-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .tz-banner strong { font-weight: 500; color: var(--text-dark); }
+    .tz-banner .accent-link { color: var(--purple-primary); }
+
+    /* ── SCHEDULE ── */
+    .schedule-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 0.5px solid var(--border-strong);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(91,66,192,0.05);
+    }
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border-bottom: 0.5px solid var(--border);
+      transition: background 0.1s;
+    }
+    .schedule-item:last-child { border-bottom: none; }
+    .schedule-item:hover { background: rgba(255,255,255,0.4); }
+    .time-pill {
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 100px;
+      padding: 7px 14px;
+      min-width: 100px;
+      text-align: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .pill-sleep  { background: var(--purple-bg); color: var(--purple-text); }
+    .pill-wake   { background: var(--yellow-bg); color: var(--yellow-text); }
+    .pill-light  { background: var(--yellow-bg); color: var(--yellow-text); }
+    .pill-avoid  { background: var(--blue-bg);   color: var(--blue-text); }
+    .pill-flight { background: var(--blue-bg);   color: var(--blue-text); }
+    .pill-prep   { background: var(--green-bg);  color: var(--green-text); }
+
+    .schedule-info { flex: 1; min-width: 0; }
+    .schedule-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .schedule-note { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .dest-badge {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      background: var(--green-bg);
+      color: var(--green-text);
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+    .schedule-type {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .type-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* ── HINTS ── */
+    .hints-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .hint { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-left, .footer-right {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+
+    /* ════════════════════════════════════
+       RESPONSIVE — tablet & mobile
+    ════════════════════════════════════ */
+
+    /* Tablet: ~768px */
+    @media (max-width: 960px) {
+      nav { padding: 14px 24px; }
+      .nav-right { display: none; } /* hide on smaller screens */
+
+      .hero { padding: 40px 24px 28px; }
+
+      .main-grid {
+        grid-template-columns: 1fr;  /* stack panels */
+        padding: 0 24px 40px;
+        gap: 20px;
+      }
+
+      .stat-row { grid-template-columns: 1fr 1fr 1fr; }
+
+      footer { padding: 16px 24px; }
+    }
+
+    /* Mobile: ~480px (iPhone 16 is 393px wide) */
+    @media (max-width: 600px) {
+      nav { padding: 12px 16px; }
+      .nav-tag { display: none; } /* keep logo clean on small screens */
+
+      .hero { padding: 28px 16px 20px; }
+      .hero-eyebrow { margin-bottom: 12px; }
+      .hero-sub { font-size: 14px; }
+
+      .main-grid { padding: 0 16px 32px; gap: 16px; }
+
+      /* Input card tighter */
+      .input-card { padding: 20px 16px; border-radius: 16px; }
+      .card-section-head { margin-bottom: 14px; }
+
+      /* Stack all field grids to single column on narrow screens */
+      .field-grid-2 { grid-template-columns: 1fr 1fr; gap: 10px; } /* keep 2-col for pairs */
+      .field-grid-3 { grid-template-columns: 1fr 1fr; gap: 10px; } /* 2-col instead of 3 */
+
+      /* Stats: 2 on top, 1 full width below */
+      .stat-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card:last-child { grid-column: 1 / -1; }  /* land at destination spans full width */
+      .stat-card { padding: 14px 16px; border-radius: 12px; }
+
+      /* Smaller stat numbers on mobile */
+      .stat-value { font-size: 26px; }
+
+      /* Tabs scroll horizontally if many */
+      .tabs-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+      .tab-btn { flex-shrink: 0; }
+
+      /* Legend: wrap tightly */
+      .legend-row { gap: 10px; }
+      .legend-item { font-size: 10px; }
+
+      /* Schedule items: hide type label on mobile to save space */
+      .schedule-type { display: none; }
+      .schedule-item { padding: 14px 16px; gap: 10px; }
+      .time-pill { font-size: 12px; padding: 6px 10px; min-width: 80px; }
+      .schedule-title { font-size: 13px; }
+
+      /* Hints: stack vertically */
+      .hints-row { flex-direction: column; gap: 10px; align-items: flex-start; padding: 0 16px; }
+
+      footer {
+        padding: 16px;
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+      }
+
+      .tz-bar { font-size: 10px; gap: 6px; }
+    }
+
+    /* Very small phones */
+    @media (max-width: 360px) {
+      .field-grid-2 { grid-template-columns: 1fr; }
+      .field-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span>☽</span>
+    Meridian
+    <span class="nav-tag">Sleep · Timezone</span>
+  </div>
+  <div class="nav-right">◎ Reset your clock with precision</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">A circadian instrument</div>
+  <h1>Sleep like you never <span class="accent">left.</span></h1>
+  <p class="hero-sub">Exact sleep, wake, light and flight prep times for short trips abroad — engineered around your real schedule, not a generic jet lag table.</p>
+</div>
+
+<div class="main-grid">
+
+  <!-- LEFT: inputs -->
+  <div>
+    <div class="input-card">
+      <div class="card-section-head">☽ Your sleep rhythm</div>
+      <div class="field-grid-2">
+        <div class="field"><label>Home timezone</label><select id="home-tz"></select></div>
+        <div class="field"><label>Destination</label><select id="dest-tz"></select></div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field"><label>Usual bedtime</label><input type="time" id="bedtime" value="23:00" /></div>
+        <div class="field"><label>Usual wake</label><input type="time" id="waketime" value="07:00" /></div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-section-head">✈ Flight details</div>
+      <div class="field-grid-2" style="margin-bottom:14px">
+        <div class="field"><label>Departure (home time)</label><input type="time" id="dep-time" value="06:00" /></div>
+        <div class="field"><label>Flight duration</label>
+          <select id="flight-dur">
+            <option value="2">2 hours</option><option value="3">3 hours</option>
+            <option value="4">4 hours</option><option value="5">5 hours</option>
+            <option value="6">6 hours</option><option value="7">7 hours</option>
+            <option value="8">8 hours</option><option value="9" selected>9 hours</option>
+            <option value="10">10 hours</option><option value="11">11 hours</option>
+            <option value="12">12 hours</option><option value="14">14 hours</option>
+            <option value="16">16 hours</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-grid-3">
+        <div class="field"><label>Trip length</label>
+          <select id="trip-days">
+            <option value="2">2 days</option><option value="3" selected>3 days</option>
+            <option value="4">4 days</option><option value="5">5 days</option>
+          </select>
+        </div>
+        <div class="field"><label>Get ready</label>
+          <select id="prep-time">
+            <option value="0.5">30 min</option><option value="0.75">45 min</option>
+            <option value="1" selected>1 hour</option><option value="1.5">1h 30m</option>
+            <option value="2">2 hours</option>
+          </select>
+        </div>
+        <div class="field"><label>Airport drive</label>
+          <select id="drive-time">
+            <option value="0.25">15 min</option><option value="0.5" selected>30 min</option>
+            <option value="0.75">45 min</option><option value="1">1 hour</option>
+            <option value="1.5">1h 30m</option><option value="2">2 hours</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tz-bar">
+        <span class="tz-code" id="tz-home-code">IST</span>
+        <span>— ✈ —</span>
+        <span class="tz-code" id="tz-dest-code">GMT</span>
+        <span>·</span>
+        <span class="tz-shift" id="tz-shift-label">5h 30m west</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: output -->
+  <div class="right-panel">
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Time shift</div>
+        <div class="stat-value"><span id="stat-shift">5h 30m</span><span class="unit" id="stat-dir">WEST</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Wake to leave</div>
+        <div class="stat-value"><span id="stat-wake">4:30 AM</span><span class="unit" id="stat-wake-tz">IST</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Land at destination</div>
+        <div class="stat-value"><span id="stat-land">9:30 AM</span><span class="unit" id="stat-land-tz">GMT</span></div>
+      </div>
+    </div>
+
+    <div class="tabs-row" id="day-tabs"></div>
+
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#9b8edc"></div> Sleep</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e8b84b"></div> Wake</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f0c040"></div> Get light</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7ab8f5"></div> Avoid light</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6bacd9"></div> Flight</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#52c49a"></div> Prep</div>
+    </div>
+
+    <div class="tz-banner">
+      <div class="tz-banner-dot" id="tz-banner-dot" style="background:#5b42c0"></div>
+      <span id="tz-banner-text"><strong>All times on this tab are in IST (your home time)</strong> — except landing time, shown in GMT.</span>
+    </div>
+
+    <div class="schedule-card">
+      <div id="schedule-list"></div>
+    </div>
+
+    <div class="hints-row">
+      <div class="hint"><span>☀</span> Light is your strongest lever</div>
+      <div class="hint"><span>◷</span> Consistency beats intensity</div>
+      <div class="hint"><span>🍽</span> Anchor to local mealtimes</div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">Meridian · Circadian Travel Companion</div>
+  <div class="footer-right">☽ Sleep with the world, not against it</div>
+</footer>
+
+<script>
+const TZ_OPTIONS = [
+  { label: "Mumbai / New Delhi (IST, UTC+5:30)", short: "IST", offset: 5.5 },
+  { label: "London (GMT, UTC+0)", short: "GMT", offset: 0 },
+  { label: "New York (EST, UTC-5)", short: "EST", offset: -5 },
+  { label: "Los Angeles (PST, UTC-8)", short: "PST", offset: -8 },
+  { label: "Dubai (GST, UTC+4)", short: "GST", offset: 4 },
+  { label: "Singapore / Hong Kong (UTC+8)", short: "SGT", offset: 8 },
+  { label: "Tokyo (JST, UTC+9)", short: "JST", offset: 9 },
+  { label: "Sydney (AEST, UTC+10)", short: "AEST", offset: 10 },
+  { label: "Paris / Berlin (CET, UTC+1)", short: "CET", offset: 1 },
+  { label: "Cape Town (SAST, UTC+2)", short: "SAST", offset: 2 },
+  { label: "Bangkok / Jakarta (UTC+7)", short: "WIB", offset: 7 },
+  { label: "Toronto / Chicago (CST, UTC-6)", short: "CST", offset: -6 },
+  { label: "Zurich / Amsterdam (CET, UTC+1)", short: "CET", offset: 1 },
+];
+
+function populateSelect(id, defaultIdx) {
+  const sel = document.getElementById(id);
+  TZ_OPTIONS.forEach((tz, i) => {
+    const opt = document.createElement("option");
+    opt.value = i; opt.textContent = tz.label;
+    sel.appendChild(opt);
+  });
+  sel.value = defaultIdx;
+}
+populateSelect("home-tz", 0);
+populateSelect("dest-tz", 1);
+
+function parseTime(str) {
+  const [h, m] = str.split(":").map(Number);
+  return h + m / 60;
+}
+function formatTime(h) {
+  h = ((h % 24) + 24) % 24;
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  const period = hh < 12 ? "AM" : "PM";
+  const dh = hh % 12 === 0 ? 12 : hh % 12;
+  return `${dh}:${mm.toString().padStart(2,"0")} ${period}`;
+}
+function shiftStr(h) {
+  const abs = Math.abs(h);
+  const hrs = Math.floor(abs);
+  const mins = Math.round((abs - hrs) * 60);
+  return mins === 0 ? `${hrs}h` : `${hrs}h ${mins}m`;
+}
+
+let allDays = [], homeTzShort = "IST", destTzShort = "GMT";
+
+function generateSchedule() {
+  const homeIdx = parseInt(document.getElementById("home-tz").value);
+  const destIdx = parseInt(document.getElementById("dest-tz").value);
+  const bedtime   = parseTime(document.getElementById("bedtime").value);
+  const waketime  = parseTime(document.getElementById("waketime").value);
+  const depTime   = parseTime(document.getElementById("dep-time").value);
+  const flightDur = parseFloat(document.getElementById("flight-dur").value);
+  const tripDays  = parseInt(document.getElementById("trip-days").value);
+  const prepTime  = parseFloat(document.getElementById("prep-time").value);
+  const driveTime = parseFloat(document.getElementById("drive-time").value);
+
+  const homeOffset = TZ_OPTIONS[homeIdx].offset;
+  const destOffset = TZ_OPTIONS[destIdx].offset;
+  homeTzShort = TZ_OPTIONS[homeIdx].short;
+  destTzShort = TZ_OPTIONS[destIdx].short;
+  const tzShift = destOffset - homeOffset;
+
+  document.getElementById("tz-home-code").textContent = homeTzShort;
+  document.getElementById("tz-dest-code").textContent = destTzShort;
+
+  if (tzShift === 0) {
+    document.getElementById("tz-shift-label").textContent = "same timezone";
+    document.getElementById("schedule-list").innerHTML = `<div style="padding:32px;text-align:center;color:var(--text-muted);">✓ Same timezone — no adjustment needed!</div>`;
+    document.getElementById("day-tabs").innerHTML = "";
+    return;
+  }
+
+  const direction = tzShift > 0 ? "east" : "west";
+  const wakeToLeave = depTime - prepTime - driveTime;
+  const landTimeLocal = depTime + flightDur + tzShift;
+
+  document.getElementById("tz-shift-label").textContent = `${shiftStr(tzShift)} ${direction}`;
+  document.getElementById("stat-shift").textContent = shiftStr(tzShift);
+  document.getElementById("stat-dir").textContent = direction.toUpperCase();
+  document.getElementById("stat-wake").textContent = formatTime(wakeToLeave);
+  document.getElementById("stat-wake-tz").textContent = homeTzShort;
+  document.getElementById("stat-land").textContent = formatTime(landTimeLocal);
+  document.getElementById("stat-land-tz").textContent = destTzShort;
+
+  allDays = [];
+  for (let d = 0; d <= tripDays; d++) {
+    const isFlightDay = d === 0;
+    const progress = tripDays <= 1 ? 1 : d / tripDays;
+    const adjustedBed  = bedtime  - tzShift * progress;
+    const adjustedWake = isFlightDay ? wakeToLeave : (waketime - tzShift * progress);
+    const items = [];
+
+    if (isFlightDay) {
+      items.push({ type:"prep",   label:"Wake up & get ready",    time: wakeToLeave,    note:`${prepTime>=1?prepTime+"h":prepTime*60+" min"} to get ready + ${driveTime>=1?driveTime+"h":driveTime*60+" min"} drive to airport` });
+      items.push({ type:"flight", label:"Leave for airport",       time: depTime-driveTime, note:"Leave buffer for check-in and security queues" });
+      items.push({ type:"flight", label:"Departure",               time: depTime,        note:`${flightDur}h flight — ${direction==="east"?"try to sleep if it's night at your destination":"stay awake if it's daytime at your destination"}` });
+      items.push({ type:"flight", label:"Land at destination",     time: landTimeLocal,  isDestTime:true, note:`This time is in ${destTzShort} — your watch/phone will show this after landing` });
+      const inFlightSleep = direction==="east" ? depTime+1 : depTime+flightDur-2;
+      items.push({ type:"sleep",  label:"In-flight sleep window",  time: inFlightSleep,  note: direction==="east"?"Sleep now — it's night at your destination":"Stay awake — it's daytime at your destination" });
+    } else {
+      if (direction === "east") {
+        items.push({ type:"wake",  label:"Wake up",                 time: adjustedWake,           note: d===1?"Force this even if groggy — it resets your clock":"Getting easier now" });
+        items.push({ type:"light", label:"Get outside — bright light", time: adjustedWake+0.25, timeEnd: adjustedWake+2, note:"Morning sunlight is the strongest signal to shift your body clock forward" });
+        items.push({ type:"avoid", label:"Dim screens and lights",  time: adjustedBed-1.5,        note:"Reduce blue light 90 min before bed to help melatonin kick in" });
+        items.push({ type:"sleep", label:"Target bedtime",          time: adjustedBed,            note: d===1?"Lie down even if not tired — no screens":`${shiftStr(Math.abs(tzShift*(1-progress)))} of adjustment remaining` });
+      } else {
+        items.push({ type:"wake",  label:"Wake up",                 time: adjustedWake,           note:"Don't sleep in — staying close to local time helps" });
+        items.push({ type:"avoid", label:"Skip morning bright light", time: adjustedWake, timeEnd: adjustedWake+1.5, note:"Morning light would push your clock the wrong way — stay indoors briefly" });
+        items.push({ type:"light", label:"Afternoon light exposure", time: adjustedBed-4,          note:"Afternoon sun helps delay your clock, making later bedtimes easier" });
+        items.push({ type:"sleep", label:"Target bedtime",          time: adjustedBed,            note: d===1?"Stay up to this local time even if tired":"Should feel more natural now" });
+      }
+    }
+
+    items.sort((a,b) => ((a.time%24+24)%24) - ((b.time%24+24)%24));
+    allDays.push({
+      label: isFlightDay ? "Flight day" : d===tripDays ? `Day ${d} (last)` : `Day ${d}`,
+      isFlightDay, items
+    });
+  }
+
+  buildTabs(); renderDay(0);
+}
+
+function buildTabs() {
+  const el = document.getElementById("day-tabs");
+  el.innerHTML = "";
+  allDays.forEach((d,i) => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (i===0?" active":"");
+    btn.innerHTML = d.isFlightDay ? `✈ Flight day` : d.label;
+    btn.onclick = () => renderDay(i);
+    el.appendChild(btn);
+  });
+}
+
+function renderDay(idx) {
+  document.querySelectorAll(".tab-btn").forEach((t,i) => t.className="tab-btn"+(i===idx?" active":""));
+  const day = allDays[idx];
+  const dot = document.getElementById("tz-banner-dot");
+  const txt = document.getElementById("tz-banner-text");
+
+  if (day.isFlightDay) {
+    dot.style.background = "#5b42c0";
+    txt.innerHTML = `<strong>All times on this tab are in ${homeTzShort} (your home time)</strong> — except landing time, shown in ${destTzShort}.`;
+  } else {
+    dot.style.background = "#1D9E75";
+    txt.innerHTML = `<strong>All times on this tab are in ${destTzShort} (destination local time)</strong> — <span class="accent-link">what your phone shows after landing.</span>`;
+  }
+
+  const typeLabel = { sleep:"SLEEP", wake:"WAKE", light:"GET LIGHT", avoid:"AVOID LIGHT", flight:"FLIGHT", prep:"PREP" };
+  const typeColor = { sleep:"#9b8edc", wake:"#e8b84b", light:"#f0c040", avoid:"#7ab8f5", flight:"#6bacd9", prep:"#52c49a" };
+  const pillClass = { sleep:"pill-sleep", wake:"pill-wake", light:"pill-light", avoid:"pill-avoid", flight:"pill-flight", prep:"pill-prep" };
+
+  const list = document.getElementById("schedule-list");
+  list.innerHTML = "";
+  day.items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "schedule-item";
+    const t1 = formatTime(item.time);
+    const timeStr = item.timeEnd ? `${t1} – ${formatTime(item.timeEnd)}` : t1;
+    const destBadge = item.isDestTime ? `<span class="dest-badge">${destTzShort}</span>` : "";
+    div.innerHTML = `
+      <div class="time-pill ${pillClass[item.type]}">${timeStr}</div>
+      <div class="schedule-info">
+        <div class="schedule-title">${item.label}${destBadge}</div>
+        <div class="schedule-note">${item.note}</div>
+      </div>
+      <div class="schedule-type"><div class="type-dot" style="background:${typeColor[item.type]}"></div>${typeLabel[item.type]}</div>`;
+    list.appendChild(div);
+  });
+}
+
+["home-tz","dest-tz","bedtime","waketime","dep-time","flight-dur","trip-days","prep-time","drive-time"].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("change", generateSchedule);
+  el.addEventListener("input", generateSchedule);
+});
+
+generateSchedule();
+</script>
+</body>
+</html>
