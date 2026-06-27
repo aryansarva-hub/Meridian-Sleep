@@ -99,7 +99,7 @@
     }
     .hero h1 {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(36px, 5vw, 68px);
+      font-size: clamp(28px, 7vw, 68px);
       font-weight: 400;
       line-height: 1.08;
       letter-spacing: -0.02em;
@@ -227,6 +227,7 @@
     .stat-value .unit { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); letter-spacing: 0.06em; }
 
     /* ── TABS ── */
+    .tabs-wrapper { position: relative; }
     .tabs-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .tab-btn {
       padding: 8px 18px;
@@ -365,12 +366,12 @@
     /* Tablet: ~768px */
     @media (max-width: 960px) {
       nav { padding: 14px 24px; }
-      .nav-right { display: none; } /* hide on smaller screens */
+      .nav-right { display: none; }
 
       .hero { padding: 40px 24px 28px; }
 
       .main-grid {
-        grid-template-columns: 1fr;  /* stack panels */
+        grid-template-columns: 1fr;
         padding: 0 24px 40px;
         gap: 20px;
       }
@@ -383,7 +384,7 @@
     /* Mobile: ~480px (iPhone 16 is 393px wide) */
     @media (max-width: 600px) {
       nav { padding: 12px 16px; }
-      .nav-tag { display: none; } /* keep logo clean on small screens */
+      .nav-tag { display: none; }
 
       .hero { padding: 28px 16px 20px; }
       .hero-eyebrow { margin-bottom: 12px; }
@@ -391,37 +392,42 @@
 
       .main-grid { padding: 0 16px 32px; gap: 16px; }
 
-      /* Input card tighter */
+      /* iOS Safari: prevent auto-zoom on input focus (triggered when font-size < 16px) */
+      .field select,
+      .field input[type="time"] { font-size: 16px; }
+
       .input-card { padding: 20px 16px; border-radius: 16px; }
       .card-section-head { margin-bottom: 14px; }
 
-      /* Stack all field grids to single column on narrow screens */
-      .field-grid-2 { grid-template-columns: 1fr 1fr; gap: 10px; } /* keep 2-col for pairs */
-      .field-grid-3 { grid-template-columns: 1fr 1fr; gap: 10px; } /* 2-col instead of 3 */
+      .field-grid-2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .field-grid-3 { grid-template-columns: 1fr; gap: 10px; }
 
-      /* Stats: 2 on top, 1 full width below */
       .stat-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .stat-card:last-child { grid-column: 1 / -1; }  /* land at destination spans full width */
+      .stat-card:last-child { grid-column: 1 / -1; }
       .stat-card { padding: 14px 16px; border-radius: 12px; }
 
-      /* Smaller stat numbers on mobile */
-      .stat-value { font-size: 26px; }
+      .stat-value { font-size: clamp(18px, 5.5vw, 26px); }
 
-      /* Tabs scroll horizontally if many */
-      .tabs-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+      .tabs-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .tabs-row::-webkit-scrollbar { display: none; }
       .tab-btn { flex-shrink: 0; }
+      .tabs-wrapper::after {
+        content: '';
+        position: absolute;
+        right: 0; top: 0; bottom: 4px;
+        width: 48px;
+        background: linear-gradient(to left, #eeeaf8 0%, transparent 100%);
+        pointer-events: none;
+      }
 
-      /* Legend: wrap tightly */
       .legend-row { gap: 10px; }
       .legend-item { font-size: 10px; }
 
-      /* Schedule items: hide type label on mobile to save space */
       .schedule-type { display: none; }
-      .schedule-item { padding: 14px 16px; gap: 10px; }
-      .time-pill { font-size: 12px; padding: 6px 10px; min-width: 80px; }
+      .schedule-item { padding: 14px 16px; gap: 10px; flex-wrap: wrap; }
+      .time-pill { font-size: 12px; padding: 6px 10px; min-width: 0; white-space: normal; }
       .schedule-title { font-size: 13px; }
 
-      /* Hints: stack vertically */
       .hints-row { flex-direction: column; gap: 10px; align-items: flex-start; padding: 0 16px; }
 
       footer {
@@ -541,7 +547,9 @@
       </div>
     </div>
 
-    <div class="tabs-row" id="day-tabs"></div>
+    <div class="tabs-wrapper">
+      <div class="tabs-row" id="day-tabs"></div>
+    </div>
 
     <div class="legend-row">
       <div class="legend-item"><div class="legend-dot" style="background:#9b8edc"></div> Sleep</div>
